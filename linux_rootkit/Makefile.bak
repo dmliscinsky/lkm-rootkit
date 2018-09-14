@@ -1,0 +1,37 @@
+#CC = gcc
+#CFLAGS = -Wall
+CFLAGS_SO = -fPIC -shared -ldl
+
+CPP_INCLUDE_DIR = /usr/include/c++/7
+KERNELS_SRC_DIR = ../linux_kernels
+
+KERNEL_4_16_2 = $(KERNELS_SRC_DIR)/linux-4.16.2
+KERNEL_HEADERS_4_16_2 = -I $(KERNEL_4_16_2)/include/ 	      -I $(KERNEL_4_16_2)/include/uapi \
+			-I $(KERNEL_4_16_2)/arch/ia64/include -I $(KERNEL_4_16_2)/arch/ia64/include/uapi
+
+CFLAGS_KO = -nostdinc $(KERNEL_HEADERS_4_16_2) #-I $(CPP_INCLUDE_DIR) -I $(CPP_INCLUDE_DIR)/tr1/ -I $(CPP_INCLUDE_DIR)/parallel/ -I /usr/include/x86_64-linux-gnu/c++/7/
+
+
+
+PROGS =
+
+SRCS   = kernel_rootkit.c
+OBJS   = $(SRCS:.c=.o)
+
+obj-m += $(OBJS)
+
+EXTRA_CFLAGS = -O2
+
+
+.PHONY: clean
+
+
+kernel_rookit.ko: kernel_rootkit.c
+#	$(CC) $(CFLAGS) $(CFLAGS_KO) -c kernel_rootkit.c -o lkm_rootkit.ko
+#	make -C /lib/modules/4.15.0-kali2-amd64/build M=$(PWD) $(CFLAGS_KO) modules
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	@rm -f $(PROGS)
